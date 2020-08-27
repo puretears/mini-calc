@@ -26,30 +26,34 @@ struct CalculatorButtonStyle: ButtonStyle {
         .frame(width: size.width, height: size.width)
         .foregroundColor(btnFgColor)
         .background(
-          Group {
-            if configuration.isPressed {
-              cover.fill(Color.offWhite)
-                .overlay(
-                  cover.stroke(Color.gray, lineWidth: 4)
-                    .blur(radius: 4)
-                    .offset(x: 2, y: 2)
-                    .mask(cover.fill(LinearGradient.blackToClear))
-                )
-                .overlay(
-                  cover.stroke(Color.white, lineWidth: 8)
-                    .blur(radius: 4)
-                    .offset(x: -2, y: -2)
-                    .mask(cover.fill(LinearGradient.clearToBlack))
-                )
-            }
-            else {
-              cover
-                .fill(Color.offWhite)
-                .shadow(color: Color.white07, radius: 4, x: -2, y: -2)
-                .shadow(color: Color.black02, radius: 4, x: 2, y: 2)
-            }
-          }
+          self.buildBackgroundGroup(cover)
         )
+    }
+    
+    func buildBackgroundGroup(_ cover: RoundedRectangle) -> some View {
+      return Group {
+        if configuration.isPressed {
+          cover.fill(Color.offWhite)
+            .overlay(
+              cover.stroke(Color.gray, lineWidth: 4)
+                .blur(radius: 4)
+                .offset(x: 2, y: 2)
+                .mask(cover.fill(LinearGradient.blackToClear))
+            )
+            .overlay(
+              cover.stroke(Color.white, lineWidth: 8)
+                .blur(radius: 4)
+                .offset(x: -2, y: -2)
+                .mask(cover.fill(LinearGradient.clearToBlack))
+            )
+        }
+        else {
+          cover
+            .fill(Color.offWhite)
+            .shadow(color: Color.white07, radius: 4, x: -2, y: -2)
+            .shadow(color: Color.black02, radius: 4, x: 2, y: 2)
+        }
+      }
     }
   }
   

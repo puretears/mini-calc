@@ -21,7 +21,7 @@ extension EnvironmentValues {
 
 class AudioPlayer {
   static let shared = AudioPlayer()
-  private var player: AVAudioPlayer!
+  private var player: AVAudioPlayer! // nil
   
   init() {
     do {

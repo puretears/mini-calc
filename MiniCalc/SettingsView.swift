@@ -16,6 +16,7 @@ struct SettingsView: View {
   ]
   
   @State var sel: String = Config.typingVoice
+  @State var isBtnAnimated: Bool = false
   @State var displayPrivacy: Bool = false
   
   init() {
@@ -31,60 +32,89 @@ struct SettingsView: View {
         
         GeometryReader { proxy in
           VStack(spacing: 30) {
-            ScrollView(.horizontal, showsIndicators: false, content: {
-              HStack {
-                ForEach(self.team, id: \.self) { member in
-                  Namecard(
-                    height: proxy.size.height * 0.4,
-                    member: member)
-                    .padding([.horizontal, .bottom], 15)
-                }
-              }
-            })
-            .padding(.top)
-            
-            Form {
-              Section(header: SectionHeader(iconName: "pencil.slash", title: "计算器设置")) {
-                Picker("按键声音", selection: self.$sel, content: {
-                  Text("Jinmo Wu (中文)").tag(AppKeys.moCn)
-                  Text("Rongxiao Liu (德语)").tag(AppKeys.rongDe)
-                  Text("Jiarui Liu (中文)").tag(AppKeys.miCn)
-                  Text("Jiarui Wu (中文)").tag(AppKeys.ruiCn)
-                })
-                .onReceive([self.sel].publisher.first()) { selection in
-                  Config.typingVoice = selection
-                  
-                  #if DEBUG
-                  print("Typing voice was changed to \(selection).")
-                  #endif
-                }
-              }
-              
-              Section(header: SectionHeader(iconName: "doc.fill", title: "Documentary")) {
-                Button(action: {
-                  self.displayPrivacy = true
-                }, label: {
-                  Text("Privacy policy")
-                    .font(Font.system(.footnote))
-                })
-              }
-            }
-            .onAppear(perform: {
-              UITableView.appearance().backgroundColor = .clear
-            })
-            .sheet(isPresented: self.$displayPrivacy, content: {
-              WebView(url: "https://boxueio.com/copyright")
-            })
-            .shadow(color: Color.white07, radius: 4, x: -2, y: -2)
-            .shadow(color: Color.black02, radius: 4, x: 2, y: 2)
+            self.buildNamecardScrollView(height: proxy.size.height * 0.4)
+            self.buildSettingsForm()
           }
-          .navigationBarTitle(Text("关于我们"))
         }
+        .sheet(isPresented: self.$displayPrivacy, content: {
+          WebView(url: "https://boxueio.com/copyright")
+        })
+        .navigationBarTitle(Text("关于我们"))
+      }
+      
+    }
+  }
+  
+  func buildNamecardScrollView(height: CGFloat) -> some View {
+    return ScrollView(.horizontal, showsIndicators: false, content: {
+      HStack {
+        ForEach(self.team, id: \.self) { member in
+          Namecard(
+            height: height,
+            member: member)
+            .padding([.horizontal, .bottom], 15)
+        }
+      }
+    })
+    .padding(.top)
+  }
+  
+  func buildSettingsForm() -> some View {
+    Form {
+      self.buildVoiceSwitchingSection()
+      self.buildButtonAnimationSection()
+      self.buildPrivacyPolicy()
+    }
+    .onAppear(perform: {
+      UITableView.appearance().backgroundColor = .clear
+    })
+    .shadow(color: Color.white07, radius: 4, x: -2, y: -2)
+    .shadow(color: Color.black02, radius: 4, x: 2, y: 2)
+    .padding(.bottom, 15)
+  }
+  
+  func buildVoiceSwitchingSection() -> some View {
+    Section(header: SectionHeader(iconName: "pencil.slash", title: "计算器设置")) {
+      Picker("按键声音", selection: self.$sel, content: {
+        Text("Jinmo Wu (中文)").tag(AppKeys.moCn)
+        Text("Rongxiao Liu (德语)").tag(AppKeys.rongDe)
+        Text("Jiarui Li (中文)").tag(AppKeys.miCn)
+        Text("Jiarui Wu (中文)").tag(AppKeys.ruiCn)
+      })
+      .onReceive([self.sel].publisher.first()) { selection in
+        Config.typingVoice = selection
+        
+        #if DEBUG
+        print("Typing voice was changed to \(selection).")
+        #endif
       }
     }
   }
   
+  func buildButtonAnimationSection() -> some View {
+    Section(header: SectionHeader(iconName: "pencil.slash", title: "计算器设置")) {
+      Toggle(isOn: $isBtnAnimated) {
+        Text("按钮动画")
+      }
+      .onReceive([self.isBtnAnimated].publisher.first()) { selection in
+        
+        #if DEBUG
+        print("Button animation switched to: \(selection).")
+        #endif
+      }
+    }
+  }
   
+  func buildPrivacyPolicy() -> some View {
+    Section(header: SectionHeader(iconName: "doc.fill", title: "Documentary")) {
+      Button(action: {
+        self.displayPrivacy = true
+      }, label: {
+        Text("Privacy policy")
+          .font(Font.system(.footnote))
+      })
+    }
+  }
 }
 
 struct SectionHeader: View {
